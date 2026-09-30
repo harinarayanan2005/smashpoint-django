@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — SMASHPOINT Pro Store</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <!-- Logo -->
+        <a href="/" class="brand-logo auth-brand">
+            SMASHPOINT<span class="logo-dot">.</span>
+        </a>
+
+        <!-- Auth Card -->
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2>PLAYER SIGN IN</h2>
+                <p>Access your tournament gear, customized orders, and fast checkout.</p>
+            </div>
+
+            {% if next and 'checkout' in next or request.GET.next and 'checkout' in request.GET.next %}
+            <div class="checkout-gate-banner">
+                <span class="gate-icon">🔒</span>
+                <div class="gate-info">
+                    <strong>Sign In Required for Checkout</strong>
+                    <span>Please sign in to proceed with your tournament purchase. If you are new, click below to register.</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Messages / Alerts -->
+            {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                <div class="alert-box alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Login Form -->
+            <form method="POST" action="{% url 'login' %}" class="auth-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next|default:request.GET.next }}">
+
+                <div class="form-group">
+                    <label for="username">Username or Player ID</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required autofocus autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <div class="label-row">
+                        <label for="password">Password</label>
+                    </div>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="btn-auth-submit">
+                    Sign In & Continue
+                </button>
+            </form>
+
+            <div class="auth-footer-links">
+                <p>New to SmashPoint? <a href="{% url 'register' %}{% if next %}?next={{ next }}{% elif request.GET.next %}?next={{ request.GET.next }}{% endif %}">Create an Account</a></p>
+                <a href="/" class="back-home-link">← Return to Store</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

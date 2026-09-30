@@ -1,0 +1,219 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Checkout — SMASHPOINT Pro Store</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="checkout-page-body">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <a href="/" class="brand-logo">
+                SMASHPOINT<span class="logo-dot">.</span>
+            </a>
+            <div class="user-greeting">
+                Verified Player: <strong>{{ user.username }}</strong>
+            </div>
+            <a href="/" class="auth-nav-link">← Back to Store</a>
+        </div>
+    </header>
+
+    <main class="checkout-container">
+        <div class="checkout-header-title">
+            <span class="step-tag">STEP 2 OF 2 • SECURE DISPATCH</span>
+            <h2>COMPLETE YOUR TOURNAMENT ORDER</h2>
+            <p>Please enter your shipping address across India for insured dispatch.</p>
+        </div>
+
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="alert-box alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="checkout-grid">
+            <!-- Left Form: Shipping & Payment -->
+            <div class="checkout-form-card">
+                <h3>1. Delivery Address (India)</h3>
+
+                <form method="POST" action="{% url 'checkout' %}" id="checkoutForm">
+                    {% csrf_token %}
+                    <!-- Hidden field populated with cart JSON from localStorage -->
+                    <input type="hidden" name="cart_data" id="cartDataInput" value="[]">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="full_name">Player / Full Name *</label>
+                            <input type="text" id="full_name" name="full_name" value="{{ user.get_full_name|default:user.username }}" required placeholder="e.g. Rahul Sharma">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone_number">Contact Mobile Number *</label>
+                            <input type="tel" id="phone_number" name="phone_number" required placeholder="e.g. 9876543210" pattern="[0-9]{10}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Delivery Street Address / Apartment / Colony *</label>
+                        <textarea id="address" name="address" rows="3" required placeholder="House/Flat No., Building Name, Street, Landmark..."></textarea>
+                    </div>
+
+                    <div class="form-row three-col">
+                        <div class="form-group">
+                            <label for="city">City *</label>
+                            <input type="text" id="city" name="city" required placeholder="e.g. Bangalore">
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State *</label>
+                            <select id="state" name="state" required class="cyber-select-input">
+                                <option value="">Select State</option>
+                                <option value="Karnataka" selected>Karnataka</option>
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Telangana">Telangana</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="Kerala">Kerala</option>
+                                <option value="West Bengal">West Bengal</option>
+                                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                <option value="Haryana">Haryana</option>
+                                <option value="Punjab">Punjab</option>
+                                <option value="Rajasthan">Rajasthan</option>
+                                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pincode">Pincode *</label>
+                            <input type="text" id="pincode" name="pincode" required placeholder="e.g. 560001" pattern="[0-9]{6}">
+                        </div>
+                    </div>
+
+                    <h3 class="payment-title">2. Select Payment Mode</h3>
+                    <div class="payment-methods">
+                        <label class="payment-option">
+                            <input type="radio" name="payment_method" value="UPI" checked>
+                            <span class="pay-box">
+                                <span class="pay-title">⚡ Instant UPI / QR</span>
+                                <span class="pay-desc">Google Pay, PhonePe, Paytm, BHIM</span>
+                            </span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment_method" value="Cards / NetBanking">
+                            <span class="pay-box">
+                                <span class="pay-title">💳 Credit / Debit Card</span>
+                                <span class="pay-desc">Visa, Mastercard, RuPay & NetBanking</span>
+                            </span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment_method" value="Cash on Delivery">
+                            <span class="pay-box">
+                                <span class="pay-title">📦 Cash on Delivery (COD)</span>
+                                <span class="pay-desc">Pay upon receiving package at your door</span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-confirm-order">
+                        🔒 Place Tournament Order
+                    </button>
+                    <p class="terms-note">By placing this order, you agree to 100% Genuine Guarantee & 7-Day Return terms.</p>
+                </form>
+            </div>
+
+            <!-- Right: Order Summary -->
+            <div class="checkout-summary-card">
+                <h3>Order Equipment Summary</h3>
+                <div class="checkout-items-list" id="checkoutItemsList">
+                    <!-- Populated via JS -->
+                </div>
+
+                <div class="checkout-totals">
+                    <div class="sum-row">
+                        <span>Items Subtotal</span>
+                        <span id="checkoutSubtotal">₹0</span>
+                    </div>
+                    <div class="sum-row">
+                        <span>Insured Express Shipping</span>
+                        <span class="free-badge">FREE</span>
+                    </div>
+                    <div class="sum-row">
+                        <span>GST & Taxes (18%)</span>
+                        <span class="included-badge">Included</span>
+                    </div>
+                    <div class="sum-row final-total">
+                        <span>Total Payable</span>
+                        <span class="total-price-cyan" id="checkoutTotalPayable">₹0</span>
+                    </div>
+                </div>
+
+                <div class="checkout-trust-box">
+                    <div class="trust-point">🛡️ 100% Sunrise & Victor Authentic Hologram</div>
+                    <div class="trust-point">📦 Reinforced Shock-Absorbing Packaging</div>
+                    <div class="trust-point">🚚 Dispatched in 24 Hours with Live Tracking</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Load items from localStorage
+        const cart = JSON.parse(localStorage.getItem('smashpoint_cart') || '[]');
+        const cartInput = document.getElementById('cartDataInput');
+        const itemsList = document.getElementById('checkoutItemsList');
+        const subtotalEl = document.getElementById('checkoutSubtotal');
+        const totalEl = document.getElementById('checkoutTotalPayable');
+
+        if (cart.length === 0) {
+            alert('Your shopping bag is empty! Redirecting to store...');
+            window.location.href = '/';
+        } else {
+            cartInput.value = JSON.stringify(cart);
+
+            let total = 0;
+            let html = '';
+            cart.forEach(item => {
+                const itemTotal = item.price * item.qty;
+                total += itemTotal;
+                html += `
+                    <div class="checkout-item-row">
+                        <div class="chk-item-img">
+                            <img src="${item.image}" alt="${item.name}">
+                        </div>
+                        <div class="chk-item-info">
+                            <h4>${item.name}</h4>
+                            <div class="chk-item-meta">
+                                <span>Qty: ${item.qty}</span>
+                                <strong>₹${itemTotal.toLocaleString('en-IN')}</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            itemsList.innerHTML = html;
+            subtotalEl.textContent = '₹' + total.toLocaleString('en-IN');
+            totalEl.textContent = '₹' + total.toLocaleString('en-IN');
+        }
+
+        // Form submit validation
+        document.getElementById('checkoutForm').addEventListener('submit', e => {
+            if (cart.length === 0) {
+                e.preventDefault();
+                alert('Your bag is empty.');
+                window.location.href = '/';
+            }
+        });
+    </script>
+</body>
+</html>

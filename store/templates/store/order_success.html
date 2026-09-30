@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed — #{{ order.order_id }} — SMASHPOINT</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="auth-body">
+    <div class="success-container">
+        <!-- Logo -->
+        <a href="/" class="brand-logo auth-brand">
+            SMASHPOINT<span class="logo-dot">.</span>
+        </a>
+
+        <div class="success-card">
+            <div class="success-badge">
+                <span class="check-icon">✓</span>
+            </div>
+            <h2>ORDER CONFIRMED & QUEUED FOR DISPATCH</h2>
+            <p class="order-id-tag">Order Reference ID: <strong>#{{ order.order_id }}</strong></p>
+            <p class="success-sub">Thank you, <strong>{{ order.full_name }}</strong>! Your tournament equipment order has been registered in our database.</p>
+
+            <div class="order-details-grid">
+                <div class="detail-box">
+                    <span>Shipping Destination:</span>
+                    <strong>{{ order.full_name }}</strong>
+                    <p>{{ order.address }}, {{ order.city }}, {{ order.state }} - {{ order.pincode }}</p>
+                    <p>Phone: +91 {{ order.phone_number }}</p>
+                </div>
+                <div class="detail-box">
+                    <span>Payment Mode:</span>
+                    <strong>{{ order.payment_method }}</strong>
+                    <span class="status-pill">{{ order.status }}</span>
+                    <p class="order-time">Placed on: {{ order.created_at|date:"d M Y, h:i A" }}</p>
+                </div>
+            </div>
+
+            <!-- Itemized Receipt -->
+            <div class="receipt-section">
+                <h4>Purchased Tournament Items</h4>
+                <div class="receipt-items">
+                    {% for item in items %}
+                    <div class="receipt-row">
+                        <div class="r-info">
+                            <strong>{{ item.product_name }}</strong>
+                            <span>Qty: {{ item.quantity }}</span>
+                        </div>
+                        <div class="r-price">
+                            ₹{{ item.price|floatformat:0 }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="receipt-total-row">
+                    <span>Total Amount Paid / Payable:</span>
+                    <strong class="receipt-grand-total">₹{{ order.total_amount|floatformat:0 }}</strong>
+                </div>
+            </div>
+
+            <div class="success-actions">
+                <a href="/" class="btn-continue-store">
+                    🏸 Continue Exploring Store
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear localStorage Cart Automatically -->
+    <script>
+        localStorage.removeItem('smashpoint_cart');
+    </script>
+</body>
+</html>

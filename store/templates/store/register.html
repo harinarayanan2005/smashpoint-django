@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account — SMASHPOINT Pro Store</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <!-- Logo -->
+        <a href="/" class="brand-logo auth-brand">
+            SMASHPOINT<span class="logo-dot">.</span>
+        </a>
+
+        <!-- Auth Card -->
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2>CREATE PLAYER ACCOUNT</h2>
+                <p>Join SmashPoint for tournament warranty, verified order tracking, and express checkout.</p>
+            </div>
+
+            {% if next and 'checkout' in next or request.GET.next and 'checkout' in request.GET.next %}
+            <div class="checkout-gate-banner">
+                <span class="gate-icon">🔒</span>
+                <div class="gate-info">
+                    <strong>New Player Registration</strong>
+                    <span>Register your account below to proceed immediately with your checkout and order confirmation.</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Messages / Alerts -->
+            {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                <div class="alert-box alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Register Form -->
+            <form method="POST" action="{% url 'register' %}" class="auth-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next|default:request.GET.next }}">
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" value="{{ username|default:'' }}" placeholder="Choose a unique player username" required autofocus autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" value="{{ email|default:'' }}" placeholder="name@example.com" autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password (min. 6 characters)</label>
+                    <input type="password" id="password" name="password" placeholder="Create a secure password" required autocomplete="new-password">
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-type your password" required autocomplete="new-password">
+                </div>
+
+                <button type="submit" class="btn-auth-submit">
+                    Register & Continue to Checkout
+                </button>
+            </form>
+
+            <div class="auth-footer-links">
+                <p>Already registered? <a href="{% url 'login' %}{% if next %}?next={{ next }}{% elif request.GET.next %}?next={{ request.GET.next }}{% endif %}">Sign In</a></p>
+                <a href="/" class="back-home-link">← Return to Store</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
