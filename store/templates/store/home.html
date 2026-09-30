@@ -42,10 +42,10 @@
 
             <!-- Navigation Links -->
             <nav class="nav-menu">
-                <a href="/?category=racquets" class="{% if active_category == 'racquets' %}active{% endif %}">Racquets</a>
-                <a href="/?category=footwear" class="{% if active_category == 'footwear' %}active{% endif %}">Footwear</a>
-                <a href="/?category=shuttlecocks" class="{% if active_category == 'shuttlecocks' %}active{% endif %}">Shuttlecocks</a>
-                <a href="/?category=bags-gear" class="{% if active_category == 'bags-gear' %}active{% endif %}">Bags & Gear</a>
+                <a href="/rackets/" class="{% if active_category == 'racquets' %}active{% endif %}">Racquets</a>
+                <a href="/footwear/" class="{% if active_category == 'footwear' %}active{% endif %}">Footwear</a>
+                <a href="/shuttlecocks/" class="{% if active_category == 'shuttlecocks' %}active{% endif %}">Shuttlecocks</a>
+                <a href="/bags-gear/" class="{% if active_category == 'bags-gear' %}active{% endif %}">Bags & Gear</a>
             </nav>
 
             <!-- User Auth Links / Account -->
@@ -94,7 +94,7 @@
                 
                 <div class="hero-cta-group">
                     <a href="#products-section" class="btn-hero-primary">Shop All Equipment ({{ total_count }})</a>
-                    <a href="/?category=racquets" class="btn-hero-secondary">Explore Pro Racquets</a>
+                    <a href="/rackets/" class="btn-hero-secondary">Explore Pro Racquets</a>
                 </div>
 
                 <div class="hero-trust-bullets">
@@ -162,28 +162,28 @@
     <!-- CATEGORY SHORTCUT STRIP -->
     <section class="category-shortcuts-section">
         <div class="shortcuts-container">
-            <a href="/?category=racquets" class="category-card-shortcut {% if active_category == 'racquets' %}active{% endif %}">
+            <a href="/rackets/" class="category-card-shortcut {% if active_category == 'racquets' %}active{% endif %}">
                 <span class="cat-icon">🏸</span>
                 <div class="cat-text">
                     <h4>Pro Racquets</h4>
                     <p>Attacking, Speed & Control</p>
                 </div>
             </a>
-            <a href="/?category=footwear" class="category-card-shortcut {% if active_category == 'footwear' %}active{% endif %}">
+            <a href="/footwear/" class="category-card-shortcut {% if active_category == 'footwear' %}active{% endif %}">
                 <span class="cat-icon">👟</span>
                 <div class="cat-text">
                     <h4>Court Footwear</h4>
                     <p>Power Cushion+ & Stability</p>
                 </div>
             </a>
-            <a href="/?category=shuttlecocks" class="category-card-shortcut {% if active_category == 'shuttlecocks' %}active{% endif %}">
+            <a href="/shuttlecocks/" class="category-card-shortcut {% if active_category == 'shuttlecocks' %}active{% endif %}">
                 <span class="cat-icon">🪶</span>
                 <div class="cat-text">
                     <h4>Shuttlecocks</h4>
                     <p>BWF Approved Feather & Nylon</p>
                 </div>
             </a>
-            <a href="/?category=bags-gear" class="category-card-shortcut {% if active_category == 'bags-gear' %}active{% endif %}">
+            <a href="/bags-gear/" class="category-card-shortcut {% if active_category == 'bags-gear' %}active{% endif %}">
                 <span class="cat-icon">🎒</span>
                 <div class="cat-text">
                     <h4>Bags & Gear</h4>
@@ -202,10 +202,10 @@
                 <span class="filter-label">Category:</span>
                 <div class="filter-chips">
                     <a href="/?{% if search_query %}q={{ search_query }}&{% endif %}{% if active_brand != 'all' %}brand={{ active_brand }}&{% endif %}{% if active_price != 'all' %}price={{ active_price }}&{% endif %}category=all#products-section" class="chip {% if active_category == 'all' %}active{% endif %}">All Equipment</a>
-                    <a href="/?category=racquets{% if search_query %}&q={{ search_query }}{% endif %}{% if active_brand != 'all' %}&brand={{ active_brand }}{% endif %}{% if active_price != 'all' %}&price={{ active_price }}{% endif %}#products-section" class="chip {% if active_category == 'racquets' %}active{% endif %}">Racquets</a>
-                    <a href="/?category=footwear{% if search_query %}&q={{ search_query }}{% endif %}{% if active_brand != 'all' %}&brand={{ active_brand }}{% endif %}{% if active_price != 'all' %}&price={{ active_price }}{% endif %}#products-section" class="chip {% if active_category == 'footwear' %}active{% endif %}">Footwear</a>
-                    <a href="/?category=shuttlecocks{% if search_query %}&q={{ search_query }}{% endif %}{% if active_brand != 'all' %}&brand={{ active_brand }}{% endif %}{% if active_price != 'all' %}&price={{ active_price }}{% endif %}#products-section" class="chip {% if active_category == 'shuttlecocks' %}active{% endif %}">Shuttlecocks</a>
-                    <a href="/?category=bags-gear{% if search_query %}&q={{ search_query }}{% endif %}{% if active_brand != 'all' %}&brand={{ active_brand }}{% endif %}{% if active_price != 'all' %}&price={{ active_price }}{% endif %}#products-section" class="chip {% if active_category == 'bags-gear' %}active{% endif %}">Bags & Gear</a>
+                    <a href="/rackets/#products-section" class="chip {% if active_category == 'racquets' %}active{% endif %}">Racquets</a>
+                    <a href="/footwear/#products-section" class="chip {% if active_category == 'footwear' %}active{% endif %}">Footwear</a>
+                    <a href="/shuttlecocks/#products-section" class="chip {% if active_category == 'shuttlecocks' %}active{% endif %}">Shuttlecocks</a>
+                    <a href="/bags-gear/#products-section" class="chip {% if active_category == 'bags-gear' %}active{% endif %}">Bags & Gear</a>
                 </div>
             </div>
 
@@ -338,10 +338,10 @@
             </div>
             <div class="footer-col">
                 <h5>Gear Categories</h5>
-                <a href="/?category=racquets">Tournament Racquets</a>
-                <a href="/?category=footwear">Court Footwear</a>
-                <a href="/?category=shuttlecocks">Feather & Nylon Shuttles</a>
-                <a href="/?category=bags-gear">Tournament Bags & Grips</a>
+                <a href="/rackets/">Tournament Racquets</a>
+                <a href="/footwear/">Court Footwear</a>
+                <a href="/shuttlecocks/">Feather & Nylon Shuttles</a>
+                <a href="/bags-gear/">Tournament Bags & Grips</a>
             </div>
             <div class="footer-col">
                 <h5>Player Support</h5>

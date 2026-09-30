@@ -8,8 +8,30 @@ import json
 import random
 from .models import Product, Category, Order, OrderItem
 
-def home(request):
-    category_slug = request.GET.get('category', 'all')
+CATEGORY_ALIASES = {
+    'racket': 'racquets',
+    'rackets': 'racquets',
+    'racquet': 'racquets',
+    'racquets': 'racquets',
+    'footwear': 'footwear',
+    'shoes': 'footwear',
+    'shoe': 'footwear',
+    'shuttlecock': 'shuttlecocks',
+    'shuttlecocks': 'shuttlecocks',
+    'shuttle': 'shuttlecocks',
+    'shuttles': 'shuttlecocks',
+    'bag': 'bags-gear',
+    'bags': 'bags-gear',
+    'gear': 'bags-gear',
+    'bags-gear': 'bags-gear',
+}
+
+def home(request, category_slug=None):
+    if not category_slug:
+        category_slug = request.GET.get('category', 'all')
+
+    category_slug = CATEGORY_ALIASES.get(category_slug.lower(), category_slug)
+
     brand_filter = request.GET.get('brand', 'all')
     price_range = request.GET.get('price', 'all')
     play_style = request.GET.get('style', 'all')
