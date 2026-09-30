@@ -46,7 +46,7 @@
 ### 5. 🔒 Enforced Checkout Authentication Flow
 - **Purchase Protection**: Direct checkout and **"Buy Now"** actions require customer authentication.
 - **Smart Redirection**:
-  - **Existing Players**: Redirected to `/login/?next=/checkout/` $\rightarrow$ credentials verified $\rightarrow$ sent directly to checkout.
+  - **Existing Players**: Redirected to `/login/?next=/checkout/` $\rightarrow$ signs in $\rightarrow$ sent directly to checkout.
   - **New Visitors**: Can click **"Create an Account"** on the gatekeeper banner $\rightarrow$ registers account $\rightarrow$ auto-authenticated $\rightarrow$ seamlessly forwarded to complete order.
   - **Logged-in Customers**: Proceed immediately to order completion without interruption.
 
@@ -157,20 +157,6 @@ python manage.py runserver
 
 Open your browser and navigate to:
 👉 **`http://127.0.0.1:8000/`**
-
----
-
-## 🔑 Default Credentials (For Testing)
-
-### 👤 Customer Account:
-- **Username**: `kento_momota`
-- **Password**: `smashpassword123`
-*(Or click "Create an Account" on the registration screen to sign up as a new player)*
-
-### 🛡️ Admin Dashboard:
-- **URL**: `http://127.0.0.1:8000/admin/`
-- **Username**: `admin`
-- **Password**: `adminpassword123`
 
 ---
 
