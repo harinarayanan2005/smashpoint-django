@@ -38,3 +38,8 @@ Thumbs.db
 
 # Media uploads (optional - keep static assets tracked)
 media/
+
+# Local documentation (kept on machine only, not on git)
+docs/
+DOCUMENTATION.md
+DOCUMENTATION.html
