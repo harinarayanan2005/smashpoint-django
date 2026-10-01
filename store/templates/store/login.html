@@ -25,7 +25,7 @@
                 <p>Access your tournament gear, customized orders, and fast checkout.</p>
             </div>
 
-            {% if next and 'checkout' in next or request.GET.next and 'checkout' in request.GET.next %}
+            {% if next and 'checkout' in next %}
             <div class="checkout-gate-banner">
                 <span class="gate-icon">🔒</span>
                 <div class="gate-info">
@@ -49,7 +49,7 @@
             <!-- Login Form -->
             <form method="POST" action="{% url 'login' %}" class="auth-form">
                 {% csrf_token %}
-                <input type="hidden" name="next" value="{{ next|default:request.GET.next }}">
+                <input type="hidden" name="next" value="{{ next|default:'' }}">
 
                 <div class="form-group">
                     <label for="username">Username or Player ID</label>
@@ -69,7 +69,7 @@
             </form>
 
             <div class="auth-footer-links">
-                <p>New to SmashPoint? <a href="{% url 'register' %}{% if next %}?next={{ next }}{% elif request.GET.next %}?next={{ request.GET.next }}{% endif %}">Create an Account</a></p>
+                <p>New to SmashPoint? <a href="{% url 'register' %}{% if next %}?next={{ next }}{% endif %}">Create an Account</a></p>
                 <a href="/" class="back-home-link">← Return to Store</a>
             </div>
         </div>
