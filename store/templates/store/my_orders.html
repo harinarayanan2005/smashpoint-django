@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders — SMASHPOINT Pro Store</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="orders-page-body">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <a href="/" class="brand-logo">
+                SMASHPOINT<span class="logo-dot">.</span>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="nav-menu">
+                <a href="/rackets/">Racquets</a>
+                <a href="/footwear/">Footwear</a>
+                <a href="/shuttlecocks/">Shuttlecocks</a>
+                <a href="/bags-gear/">Bags & Gear</a>
+            </nav>
+
+            <!-- User Auth Links / Account -->
+            <div class="user-auth-nav">
+                {% if user.is_staff or user.is_superuser %}
+                <a href="/admin/" class="auth-nav-btn admin-badge-btn" title="Open Admin Portal">👑 Admin Portal</a>
+                {% endif %}
+                <a href="{% url 'my_orders' %}" class="auth-nav-link orders-nav-link active">📦 My Orders</a>
+                <span class="user-greeting">🏸 <strong>{{ user.username }}</strong></span>
+                <a href="{% url 'logout' %}" class="auth-nav-link logout-link">Sign Out</a>
+            </div>
+
+            <!-- Return link -->
+            <a href="/" class="auth-nav-link">← Return to Store</a>
+        </div>
+    </header>
+
+    <!-- Flash Messages -->
+    {% if messages %}
+    <div class="store-messages-container">
+        {% for message in messages %}
+        <div class="alert-box alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Container -->
+    <main class="my-orders-container">
+        <div class="orders-header-title">
+            <div class="title-badge-row">
+                <span class="step-tag">PLAYER LOGBOOK</span>
+                <h2>YOUR TOURNAMENT ORDERS</h2>
+            </div>
+            <p>Track your equipment dispatches, view invoice details, and verify delivered badminton gear.</p>
+        </div>
+
+        {% if orders %}
+        <div class="orders-list-grid">
+            {% for order in orders %}
+            <article class="order-summary-card">
+                <!-- Order Card Header -->
+                <div class="order-card-header">
+                    <div class="order-id-block">
+                        <span class="order-label">ORDER ID</span>
+                        <h3 class="order-code">{{ order.order_id }}</h3>
+                        <span class="order-timestamp">{{ order.created_at|date:"d M Y, h:i A" }}</span>
+                    </div>
+
+                    <div class="order-status-block">
+                        <span class="status-pill status-{{ order.status|slugify }}">
+                            ● {{ order.status }}
+                        </span>
+                        <span class="payment-method-pill">Payment: {{ order.payment_method }}</span>
+                    </div>
+
+                    <div class="order-amount-block">
+                        <span class="order-label">TOTAL AMOUNT</span>
+                        <div class="order-total-price">₹{{ order.total_amount|floatformat:0 }}</div>
+                    </div>
+                </div>
+
+                <!-- Items Purchased -->
+                <div class="order-items-table">
+                    <h4>Purchased Equipment ({{ order.items.count }} item{{ order.items.count|pluralize }})</h4>
+                    <div class="order-items-grid">
+                        {% for item in order.items.all %}
+                        <div class="order-item-chip">
+                            {% if item.image_url %}
+                            <div class="item-chip-thumb">
+                                <img src="{{ item.image_url }}" alt="{{ item.product_name }}">
+                            </div>
+                            {% endif %}
+                            <div class="item-chip-details">
+                                <span class="chip-name">{{ item.product_name }}</span>
+                                <span class="chip-qty-price">{{ item.quantity }} × ₹{{ item.price|floatformat:0 }}</span>
+                            </div>
+                            <div class="chip-subtotal">
+                                ₹{% widthratio item.price 1 item.quantity %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Shipping Address Footer -->
+                <div class="order-card-footer">
+                    <div class="shipping-snapshot">
+                        <span class="ship-icon">📍</span>
+                        <p><strong>Deliver To:</strong> {{ order.full_name }} ({{ order.phone_number }}), {{ order.address }}, {{ order.city }}, {{ order.state }} - {{ order.pincode }}</p>
+                    </div>
+                    <div class="order-action-links">
+                        <a href="{% url 'order_detail' order.order_id %}" class="btn-invoice-receipt">
+                            View Official Invoice Receipt →
+                        </a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="empty-orders-card">
+            <div class="empty-orders-icon">🏸</div>
+            <h3>No Orders Placed Yet</h3>
+            <p>You haven't ordered any tournament racquets or equipment under this player account yet.</p>
+            <a href="/" class="btn-hero-primary" style="margin-top: 1.5rem;">Explore Tournament Equipment</a>
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- Professional Footer -->
+    <footer class="footer site-footer">
+        <div class="footer-inner footer-container">
+            <div class="footer-col brand-col">
+                <div class="brand-logo">SMASHPOINT<span class="logo-dot">.</span></div>
+                <p>India's authorized supplier of championship-grade badminton racquets, court footwear, and tournament shuttles.</p>
+            </div>
+            <div class="footer-col">
+                <h5>Authorized Brands</h5>
+                <a href="/?brand=Yonex">Yonex Japan</a>
+                <a href="/?brand=Victor">Victor Sports</a>
+                <a href="/?brand=Li-Ning">Li-Ning Badminton</a>
+            </div>
+            <div class="footer-col">
+                <h5>Player Support</h5>
+                <a href="{% url 'my_orders' %}">Order History</a>
+                <a href="/login/">Player Login</a>
+                <a href="/admin/">Admin Dashboard</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 SMASHPOINT Badminton Pro Store. All Rights Reserved. Official Sunrise Equipment Partner.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -19,7 +19,8 @@
                 SMASHPOINT<span class="logo-dot">.</span>
             </a>
             <div class="user-greeting">
-                Verified Player: <strong>{{ user.username }}</strong>
+                Placing Order As: <strong>{{ user.username }}</strong>
+                <a href="{% url 'logout' %}" style="margin-left: 0.5rem; color: #38bdf8; font-size: 0.8rem; text-decoration: underline;" title="Sign into another player account">Switch Account</a>
             </div>
             <a href="/" class="auth-nav-link">← Back to Store</a>
         </div>

@@ -51,11 +51,15 @@
             <!-- User Auth Links / Account -->
             <div class="user-auth-nav">
                 {% if user.is_authenticated %}
-                <span class="user-greeting">🏸 <strong>{{ user.username }}</strong></span>
-                <a href="{% url 'logout' %}" class="auth-nav-link logout-link">Sign Out</a>
+                    {% if user.is_staff or user.is_superuser %}
+                    <a href="/admin/" class="auth-nav-btn admin-badge-btn" title="Open Admin Portal">👑 Admin Portal</a>
+                    {% endif %}
+                    <a href="{% url 'my_orders' %}" class="auth-nav-link orders-nav-link">📦 My Orders</a>
+                    <span class="user-greeting">🏸 <strong>{{ user.username }}</strong></span>
+                    <a href="{% url 'logout' %}" class="auth-nav-link logout-link">Sign Out</a>
                 {% else %}
-                <a href="{% url 'login' %}" class="auth-nav-link">Sign In</a>
-                <a href="{% url 'register' %}" class="auth-nav-btn">Register</a>
+                    <a href="{% url 'login' %}" class="auth-nav-link">Sign In</a>
+                    <a href="{% url 'register' %}" class="auth-nav-btn">Register</a>
                 {% endif %}
             </div>
 
@@ -278,9 +282,11 @@
                 {% endif %}
 
                 <!-- High-contrast White Pod for 100% Crisp Frame & String Visibility -->
-                <div class="product-image-box">
-                    <img src="/static/{{ product.image_url }}" alt="{{ product.name }}" class="product-img" loading="lazy">
-                </div>
+                <a href="{% url 'product_detail' product.slug %}" class="product-img-link" title="View {{ product.name }} specifications">
+                    <div class="product-image-box">
+                        <img src="/static/{{ product.image_url }}" alt="{{ product.name }}" class="product-img" loading="lazy">
+                    </div>
+                </a>
 
                 <div class="product-details">
                     <div class="brand-rating-row">
@@ -291,7 +297,9 @@
                         </div>
                     </div>
 
-                    <h4 class="product-title">{{ product.name }}</h4>
+                    <h4 class="product-title">
+                        <a href="{% url 'product_detail' product.slug %}" class="product-title-link">{{ product.name }}</a>
+                    </h4>
 
                     {% if product.specs %}
                     <p class="product-specs-chip">{{ product.specs }}</p>
@@ -302,13 +310,16 @@
                             <span class="currency">₹</span>
                             <span class="amount">{{ product.price|floatformat:0 }}</span>
                         </div>
+                        <span class="stock-badge-pill {% if product.is_in_stock %}in-stock{% else %}out-of-stock{% endif %}">
+                            {% if product.is_in_stock %}● In Stock ({{ product.stock_quantity }}){% else %}✕ Out of Stock{% endif %}
+                        </span>
                     </div>
 
                     <div class="card-actions">
-                        <button class="add-cart-btn" onclick="addToCart('{{ product.name|escapejs }}', {{ product.price }}, '/static/{{ product.image_url }}')">
+                        <button class="add-cart-btn" {% if not product.is_in_stock %}disabled style="opacity:0.4;cursor:not-allowed;"{% endif %} onclick="addToCart('{{ product.name|escapejs }}', {{ product.price }}, '/static/{{ product.image_url }}', this)">
                             + Cart
                         </button>
-                        <button class="buy-now-btn" onclick="buyNow('{{ product.name|escapejs }}', {{ product.price }}, '/static/{{ product.image_url }}')">
+                        <button class="buy-now-btn" {% if not product.is_in_stock %}disabled style="opacity:0.4;cursor:not-allowed;"{% endif %} onclick="buyNow('{{ product.name|escapejs }}', {{ product.price }}, '/static/{{ product.image_url }}')">
                             Buy Now
                         </button>
                     </div>
@@ -405,7 +416,7 @@
             renderCart();
         }
 
-        function addToCart(name, price, image) {
+        function addToCart(name, price, image, btn = null) {
             const existing = cart.find(item => item.name === name);
             if (existing) {
                 existing.qty += 1;
@@ -413,8 +424,20 @@
                 cart.push({ name, price, image, qty: 1 });
             }
             saveCart();
-            openCart();
-            showToast(`Added "${name}" to your bag.`);
+            // Do NOT auto open drawer - user stays in page to freely browse!
+            showToast(`✓ Added "${name}" to your bag.`);
+
+            if (btn) {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '✓ Added!';
+                btn.style.borderColor = '#34d399';
+                btn.style.color = '#34d399';
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.style.borderColor = '';
+                    btn.style.color = '';
+                }, 1200);
+            }
         }
 
         // Direct "Buy Now" flow: adds to cart and proceeds immediately to checkout

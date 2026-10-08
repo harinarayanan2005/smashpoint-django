@@ -1,0 +1,154 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice #{{ order.order_id }} — SMASHPOINT</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="invoice-page-body">
+    <!-- Header -->
+    <header class="header no-print">
+        <div class="header-inner">
+            <a href="/" class="brand-logo">
+                SMASHPOINT<span class="logo-dot">.</span>
+            </a>
+            <div class="user-greeting">
+                Verified Player: <strong>{{ user.username }}</strong>
+            </div>
+            <div class="invoice-nav-actions">
+                <a href="{% url 'my_orders' %}" class="auth-nav-link">← Back to My Orders</a>
+                <a href="/" class="auth-nav-link">Return to Store</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="invoice-container">
+        <!-- Invoice Action Bar -->
+        <div class="invoice-action-bar no-print">
+            <div class="status-indicator">
+                <span class="step-tag">OFFICIAL TAX INVOICE</span>
+                <h2>ORDER #{{ order.order_id }}</h2>
+            </div>
+            <div class="print-actions">
+                <button type="button" class="btn-print-invoice" onclick="window.print()">
+                    🖨️ Print / Save PDF Invoice
+                </button>
+            </div>
+        </div>
+
+        <!-- Printable Invoice Sheet -->
+        <div class="invoice-paper-sheet">
+            <!-- Sheet Header -->
+            <div class="invoice-sheet-header">
+                <div class="invoice-company">
+                    <h1 class="invoice-brand">SMASHPOINT<span>.</span></h1>
+                    <p class="company-sub">Tournament Grade Badminton Retailer & Equipment Distributor</p>
+                    <p class="company-gst">GSTIN: 29AABCU9603R1ZM • Authorized Sunrise Partner</p>
+                </div>
+                <div class="invoice-meta-box">
+                    <div class="meta-row">
+                        <span class="meta-label">INVOICE NO:</span>
+                        <strong class="meta-val">INV-{{ order.order_id }}</strong>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">ORDER DATE:</span>
+                        <span class="meta-val">{{ order.created_at|date:"F d, Y" }}</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">STATUS:</span>
+                        <span class="meta-val status-badge-mini">{{ order.status }}</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">PAYMENT:</span>
+                        <span class="meta-val">{{ order.payment_method }} (Verified)</span>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="invoice-divider">
+
+            <!-- Customer & Shipping Block -->
+            <div class="invoice-addresses-grid">
+                <div class="address-col">
+                    <span class="col-title">DELIVERY DESTINATION</span>
+                    <strong class="customer-name">{{ order.full_name }}</strong>
+                    <p class="customer-addr">{{ order.address }}</p>
+                    <p class="customer-city">{{ order.city }}, {{ order.state }} - {{ order.pincode }}</p>
+                    <p class="customer-contact">📞 Mobile: {{ order.phone_number }}</p>
+                </div>
+                <div class="address-col">
+                    <span class="col-title">DISPATCH CARRIER</span>
+                    <strong>BlueDart Apex Air (Tournament Insured)</strong>
+                    <p>Tracking Code: <span class="tracking-code">BD-AIR-{{ order.order_id }}</span></p>
+                    <p>Packaging: Hard Shock-Proof Racquet Casing</p>
+                    <p>Coverage: 100% Transit Protection Included</p>
+                </div>
+            </div>
+
+            <!-- Table of Line Items -->
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>Equipment Description</th>
+                        <th style="text-align: right; width: 140px;">Unit Price</th>
+                        <th style="text-align: center; width: 80px;">Qty</th>
+                        <th style="text-align: right; width: 150px;">Item Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <strong class="item-title">{{ item.product_name }}</strong>
+                            <span class="item-subtitle">Original Sunrise India Hologram Certified</span>
+                        </td>
+                        <td style="text-align: right;">₹{{ item.price|floatformat:2 }}</td>
+                        <td style="text-align: center;">{{ item.quantity }}</td>
+                        <td style="text-align: right; font-weight: 700;">₹{% widthratio item.price 1 item.quantity %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Invoice Totals Block -->
+            <div class="invoice-totals-wrapper">
+                <div class="invoice-notes">
+                    <h4>Tournament Warranty Notice</h4>
+                    <p>All racquets come with an official manufacturer warranty against frame defect under recommended tension. Keep this invoice for any warranty claims.</p>
+                </div>
+                <div class="invoice-totals-table">
+                    <div class="tot-row">
+                        <span>Items Subtotal:</span>
+                        <span>₹{{ order.total_amount|floatformat:2 }}</span>
+                    </div>
+                    <div class="tot-row">
+                        <span>Air Freight Delivery:</span>
+                        <span class="free-text">FREE (Express)</span>
+                    </div>
+                    <div class="tot-row">
+                        <span>GST (Inclusive 18%):</span>
+                        <span>₹{{ order.total_amount|floatformat:2 }}</span>
+                    </div>
+                    <div class="tot-row grand-total">
+                        <span>Total Paid:</span>
+                        <span class="grand-price">₹{{ order.total_amount|floatformat:2 }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Signoff Footer -->
+            <div class="invoice-signoff">
+                <p>This is a computer-generated tax invoice for SMASHPOINT Tournament Store. No signature required.</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

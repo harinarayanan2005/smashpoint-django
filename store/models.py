@@ -17,7 +17,7 @@ class Product(models.Model):
     slug = models.SlugField(unique=True)
     brand = models.CharField(max_length=100, default='Yonex')
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    image_url = models.URLField(max_length=500)
+    image_url = models.CharField(max_length=500)
     description = models.TextField()
     
     # Badminton-specific specs
@@ -25,9 +25,27 @@ class Product(models.Model):
     badge = models.CharField(max_length=50, default="Head-Heavy")
     rating = models.DecimalField(max_digits=2, decimal_places=1, default=4.9)
     is_featured = models.BooleanField(default=True)
+    stock_quantity = models.PositiveIntegerField(default=15)
+    is_in_stock = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-id']
 
     def __str__(self):
         return self.name
+
+class Review(models.Model):
+    product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.IntegerField(default=5)
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name} ({self.rating}★)"
 
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
@@ -41,7 +59,10 @@ class Order(models.Model):
     payment_method = models.CharField(max_length=50, default='UPI')
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=50, default='Confirmed (Processing)')
+    status = models.CharField(max_length=50, default='Successful')
+
+    class Meta:
+        ordering = ['-created_at']
 
     def __str__(self):
         return f"Order #{self.order_id} - {self.full_name} (₹{self.total_amount})"

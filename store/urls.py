@@ -26,6 +26,14 @@ urlpatterns = [
 
     path('category/<slug:category_slug>/', views.home, name='category_filter'),
 
+    # Product Detail
+    path('product/<slug:slug>/', views.product_detail, name='product_detail'),
+
+    # Orders
+    path('my-orders/', views.my_orders, name='my_orders'),
+    path('orders/', views.my_orders, name='orders_alias'),
+    path('order/<str:order_id>/', views.order_detail, name='order_detail'),
+
     # Auth & Checkout
     path('login/', views.user_login, name='login'),
     path('register/', views.user_register, name='register'),

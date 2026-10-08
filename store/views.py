@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Avg
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 import json
 import random
-from .models import Product, Category, Order, OrderItem
+from .models import Product, Category, Order, OrderItem, Review
 
 CATEGORY_ALIASES = {
     'racket': 'racquets',
@@ -108,18 +108,85 @@ def home(request, category_slug=None):
     })
 
 
+def product_detail(request, slug):
+    product = get_object_or_404(Product, slug=slug)
+    related_products = Product.objects.filter(category=product.category).exclude(id=product.id)[:4]
+    reviews = product.reviews.all()
+    user_has_reviewed = False
+
+    if request.user.is_authenticated:
+        user_has_reviewed = reviews.filter(user=request.user).exists()
+
+    if request.method == 'POST' and request.user.is_authenticated:
+        rating = int(request.POST.get('rating', 5))
+        comment = request.POST.get('comment', '').strip()
+
+        if comment:
+            Review.objects.create(
+                product=product,
+                user=request.user,
+                rating=min(max(rating, 1), 5),
+                comment=comment
+            )
+            # Recalculate average rating
+            avg = product.reviews.aggregate(Avg('rating'))['rating__avg']
+            if avg:
+                product.rating = round(avg, 1)
+                product.save()
+
+            messages.success(request, 'Thank you! Your tournament review has been published.')
+            return redirect('product_detail', slug=product.slug)
+
+    return render(request, 'store/product_detail.html', {
+        'product': product,
+        'related_products': related_products,
+        'reviews': reviews,
+        'user_has_reviewed': user_has_reviewed,
+    })
+
+
+@login_required(login_url='/login/?next=/my-orders/')
+def my_orders(request):
+    # Auto-link any orders where customer full_name matches username or email
+    # in case an order was placed when an admin session was active
+    username_clean = request.user.username.replace('_', ' ').strip().lower()
+    for o in Order.objects.filter(user__is_staff=True):
+        if o.full_name.strip().lower() == username_clean or (request.user.email and request.user.email.lower() == o.user.email.lower()):
+            o.user = request.user
+            o.save()
+
+    orders = Order.objects.filter(user=request.user).prefetch_related('items').order_by('-created_at')
+    return render(request, 'store/my_orders.html', {
+        'orders': orders
+    })
+
+
+@login_required(login_url='/login/?next=/my-orders/')
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, order_id=order_id)
+    # Security check: must belong to user or user must be staff
+    if order.user != request.user and not request.user.is_staff:
+        messages.error(request, 'You do not have permission to view that order.')
+        return redirect('my_orders')
+
+    return render(request, 'store/order_detail.html', {
+        'order': order,
+        'items': order.items.all()
+    })
+
+
 def user_register(request):
     if request.user.is_authenticated:
         return redirect('home')
 
-    next_url = request.GET.get('next', 'home')
+    next_url = request.GET.get('next', '')
 
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '')
         confirm_password = request.POST.get('confirm_password', '')
-        next_redirect = request.POST.get('next', 'home')
+        next_redirect = request.POST.get('next', '')
 
         # Validations
         if not username or not password:
@@ -145,9 +212,9 @@ def user_register(request):
         # Create user
         user = User.objects.create_user(username=username, email=email, password=password)
         login(request, user)
-        messages.success(request, f'Welcome to SmashPoint, {user.username}! Your account has been registered.')
+        messages.success(request, f'Welcome to SmashPoint, {user.username}! Your player account is registered.')
         
-        if next_redirect and next_redirect not in ['home', 'None', '']:
+        if next_redirect and next_redirect not in ['home', 'None', '', '/']:
             return redirect(next_redirect)
         return redirect('home')
 
@@ -156,14 +223,16 @@ def user_register(request):
 
 def user_login(request):
     if request.user.is_authenticated:
+        if request.user.is_staff or request.user.is_superuser:
+            return redirect('/admin/')
         return redirect('home')
 
-    next_url = request.GET.get('next', 'home')
+    next_url = request.GET.get('next', '')
 
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
-        next_redirect = request.POST.get('next', 'home')
+        next_redirect = request.POST.get('next', '')
 
         if not username or not password:
             messages.error(request, 'Please enter your username and password.')
@@ -173,10 +242,15 @@ def user_login(request):
 
         if user is not None:
             login(request, user)
-            messages.success(request, f'Welcome back, {user.username}!')
-            if next_redirect and next_redirect not in ['home', 'None', '']:
-                return redirect(next_redirect)
-            return redirect('home')
+            # Check if this user is admin / staff
+            if user.is_staff or user.is_superuser:
+                messages.success(request, f'Welcome Administrator {user.username}! Redirecting to Admin Management Portal.')
+                return redirect('/admin/')
+            else:
+                messages.success(request, f'Welcome back, {user.username}!')
+                if next_redirect and next_redirect not in ['home', 'None', '', '/']:
+                    return redirect(next_redirect)
+                return redirect('home')
         else:
             messages.error(request, 'Invalid username or password. Please try again.')
 
@@ -228,18 +302,31 @@ def checkout(request):
             state=state,
             pincode=pincode,
             payment_method=payment_method,
-            total_amount=total_amount
+            total_amount=total_amount,
+            status='Successful'
         )
 
-        # Create Order Items
+        # Create Order Items and update stock
         for item in cart_items:
+            product_name = item.get('name', 'Badminton Equipment')
             OrderItem.objects.create(
                 order=order,
-                product_name=item.get('name', 'Badminton Equipment'),
+                product_name=product_name,
                 price=item.get('price', 0),
                 quantity=item.get('qty', 1),
                 image_url=item.get('image', '')
             )
+            # Update stock if matching product exists
+            prod = Product.objects.filter(name=product_name).first()
+            if prod:
+                qty_purchased = item.get('qty', 1)
+                if prod.stock_quantity >= qty_purchased:
+                    prod.stock_quantity -= qty_purchased
+                else:
+                    prod.stock_quantity = 0
+                if prod.stock_quantity == 0:
+                    prod.is_in_stock = False
+                prod.save()
 
         return render(request, 'store/order_success.html', {
             'order': order,
